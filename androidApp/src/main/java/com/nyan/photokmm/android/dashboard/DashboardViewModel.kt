@@ -30,7 +30,9 @@ class DashboardViewModel(
 
             try {
                 //Get the photos from source.
-                val result = getPhotosUseCase(tags = "Electrolux")
+                val result = getPhotosUseCase(
+                    tags = "Electrolux",
+                    page = currentPage)
                 //Combine the result with the previous list.
                 val photos = if (currentPage == 1) result else uiState.photos + result
 

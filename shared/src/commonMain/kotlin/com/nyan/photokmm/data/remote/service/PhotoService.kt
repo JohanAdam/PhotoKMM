@@ -7,7 +7,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
 internal class PhotoService: ApiClient() {
-    suspend fun getPhotos(tags: String): PhotosResponse = client.get {
+    suspend fun getPhotos(tags: String, page: Int): PhotosResponse = client.get {
         pathUrl("services/rest")
         parameter("method", "flickr.photos.search")
         parameter("tags", tags)
@@ -15,6 +15,6 @@ internal class PhotoService: ApiClient() {
         parameter("nojsoncallback", "true")
         parameter("extras", "media,url_sq,url_m")
         parameter("per_page", 20)
-        parameter("page", 1)
+        parameter("page", page)
     }.body()
 }
