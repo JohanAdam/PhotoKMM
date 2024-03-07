@@ -15,16 +15,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+val Dark1 = Color(0xFF212121)
+val Dark2 = Color(0xFF424242)
+val Dark3 = Color(0xFF616161)
+val Dark4 = Color(0xFF797979)
+val Purple = Color(0xFF536DFE)
+
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {
         darkColorScheme(
-            primary = Color(0xFFBB86FC),
-            secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3)
+            primary = Dark4,
+            tertiary = Dark3,
+            secondary = Purple,
+            surface = Dark2,
+            background = Dark1,
         )
     } else {
         lightColorScheme(
