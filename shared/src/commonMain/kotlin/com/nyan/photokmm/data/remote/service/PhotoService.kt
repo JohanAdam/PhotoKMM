@@ -1,5 +1,6 @@
-package com.nyan.photokmm.data.remote
+package com.nyan.photokmm.data.remote.service
 
+import com.nyan.photokmm.data.remote.ApiClient
 import com.nyan.photokmm.data.remote.model.PhotosResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
