@@ -7,14 +7,25 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
 internal class PhotoService: ApiClient() {
-    suspend fun getPhotos(tags: String): PhotosResponse = client.get {
+
+    suspend fun getPhotos(tags: String, page: Int): PhotosResponse = client.get {
         pathUrl("services/rest")
-        parameter("method", "flickr.photos.search")
+        parameter("method", METHOD)
         parameter("tags", tags)
-        parameter("format", "json")
-        parameter("nojsoncallback", "true")
-        parameter("extras", "media,url_sq,url_m")
-        parameter("per_page", 20)
-        parameter("page", 1)
+        parameter("format", FORMAT)
+        parameter("nojsoncallback", NO_JSON_CALLBACK)
+        parameter("extras", "$EXTRAS_MEDIA,$EXTRAS_URL_SQ,$EXTRAS_URL_M")
+        parameter("per_page", MAX_ITEM_PER_PAGE)
+        parameter("page", page)
     }.body()
+
+    companion object {
+        private const val METHOD = "flickr.photos.search"
+        private const val FORMAT = "json"
+        private const val NO_JSON_CALLBACK = true
+        private const val EXTRAS_MEDIA = "media"
+        private const val EXTRAS_URL_SQ = "url_sq"
+        private const val EXTRAS_URL_M = "url_m"
+        private const val MAX_ITEM_PER_PAGE = 21
+    }
 }

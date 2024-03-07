@@ -2,6 +2,7 @@ package com.nyan.photokmm.data.remote
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.parameter
 import io.ktor.http.path
@@ -13,6 +14,10 @@ private const val BASE_URL = "https://api.flickr.com/"
 const val API_KEY = "de999896f23d7677fe19d14c6bb0b0b8"
 internal abstract class ApiClient {
     val client = HttpClient {
+        install(Logging) {
+            logger = Logger.SIMPLE
+            level = LogLevel.ALL
+        }
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
