@@ -13,19 +13,25 @@ class DashboardViewModel(
     val getPhotosUseCase: GetPhotosUseCase
 ): ViewModel() {
 
+    // Define the mutable state for the UI.
     var uiState by mutableStateOf(DashboardScreenState())
     private var currentPage = 1
 
     init {
+        //Load photos for the first time when the viewmodel is initialized.
         loadPhotos(forceReload = false)
     }
 
     fun loadPhotos(forceReload: Boolean = false) {
+        // If already loading, return.
         if (uiState.loading) return
+        // Reset current page if force reload is enabled.
         if (forceReload) currentPage = 1
+        // Set refreshing state if loading first page.
         if (currentPage == 1) uiState = uiState.copy(refreshing = true)
 
         viewModelScope.launch {
+            // Set loading state
             uiState = uiState.copy(loading = true)
 
             try {
@@ -47,8 +53,10 @@ class DashboardViewModel(
                 )
 
             } catch (error: Throwable) {
+                // Handle error if anything happen during fetch photos.
                 error.printStackTrace()
 
+                //Update UI with error message.
                 uiState = uiState.copy(
                     loading = false,
                     refreshing = false,

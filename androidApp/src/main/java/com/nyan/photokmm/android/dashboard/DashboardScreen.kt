@@ -33,39 +33,58 @@ fun DashboardScreen(
     loadNextPhotos: (Boolean) -> Unit,
     navigateToDetail: (Photo) -> Unit
 ) {
-
+    //Pull to refresh state.
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.refreshing,
         onRefresh = { loadNextPhotos(true) }
     )
 
+    // ==========================
+    // Main content.
+    // ==========================
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.background)
             .pullRefresh(state = pullRefreshState)
     ) {
+        // ==========================
+        // Pull to Refresh Indicator.
+        // ==========================
+        PullRefreshIndicator(
+            refreshing = uiState.refreshing,
+            state = pullRefreshState,
+            modifier = modifier.align(Alignment.TopCenter)
+        )
+
+        // ==========================
+        // List.
+        // ==========================
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            itemsIndexed(
-                uiState.photos,
-                key = { _, photo -> photo.id }
-            ) { index, photo ->
-                PhotoListItem(
-                    modifier = modifier,
+            // ==========================
+            // Photo List Item.
+            // ==========================
+            itemsIndexed(uiState.photos,
+                key = { _, photo -> photo.id }) { index, photo ->
+                PhotoListItem(modifier = modifier,
                     photo = photo,
-                    onPhotoClick = { navigateToDetail(photo) }
-                )
+                    onPhotoClick = { navigateToDetail(photo) })
 
+                //Load more photos if scrolled to the end.
                 if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
                     LaunchedEffect(key1 = Unit, block = { loadNextPhotos(false) })
                 }
             }
 
+            // ==========================
+            // Footer Progress Bar.
+            // ==========================
+            //Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
             if (uiState.loading && uiState.photos.isNotEmpty()) {
                 item(span = { GridItemSpan(2) }) {
                     Row(
@@ -75,19 +94,10 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CircularProgressIndicator(
-                            color = Purple
-                        )
+                        CircularProgressIndicator(color = Purple)
                     }
                 }
             }
         }
-
-        PullRefreshIndicator(
-            refreshing = uiState.refreshing,
-            state = pullRefreshState,
-            modifier = modifier.align(Alignment.TopCenter)
-        )
     }
-
 }
