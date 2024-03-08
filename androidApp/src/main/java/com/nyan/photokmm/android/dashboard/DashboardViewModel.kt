@@ -7,24 +7,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nyan.photokmm.domain.model.Photo
 import com.nyan.photokmm.domain.usecase.GetPhotosUseCase
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
     val getPhotosUseCase: GetPhotosUseCase
 ): ViewModel() {
-
     // Define the mutable state for the UI.
     var uiState by mutableStateOf(DashboardScreenState())
     private var currentPage = 1
 
     var message by mutableStateOf<String?>(null)
 
+    //Search job delay.
+    private var debounceJob: Job? = null
+    var searchQuery by mutableStateOf("")
+        private set
+
     init {
         //Load photos for the first time when the viewmodel is initialized.
         loadPhotos(forceReload = false)
     }
 
-    fun loadPhotos(forceReload: Boolean = false) {
+    fun loadPhotos(forceReload: Boolean = false, tag: String = "") {
         // If already loading, return.
         if (uiState.loading) return
         // Reset current page if force reload is enabled.
@@ -39,7 +45,7 @@ class DashboardViewModel(
             try {
                 //Get the photos from source.
                 val result = getPhotosUseCase(
-                    tags = "Electrolux",
+                    tags = tag.ifEmpty { "Electrolux" },
                     page = currentPage)
                 //Combine the result with the previous list.
                 val photos = if (currentPage == 1) result else uiState.photos + result
@@ -73,6 +79,22 @@ class DashboardViewModel(
         message = "Downloaded photo $photoId"
     }
 
+    fun onSearchTextChanged(searchText: String, onSubmit: Boolean = false) {
+        searchQuery = searchText
+
+        //If onSubmit false, need to delay before sent the queryText to loadPhoto.
+        if (!onSubmit) {
+            debounceJob?.cancel() // Cancel the previous debounce job
+            debounceJob = viewModelScope.launch {
+                // Delay time 1 second before sent the query to API.
+                delay(1000)
+                loadPhotos(true, searchQuery)
+            }
+        } else {
+            //Load photos with query text without delay.
+            loadPhotos(true, searchQuery)
+        }
+    }
 }
 
 data class DashboardScreenState (
