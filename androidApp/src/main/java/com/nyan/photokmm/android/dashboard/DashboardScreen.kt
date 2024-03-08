@@ -119,7 +119,11 @@ fun DashboardScreen(
                         isSelected = isSelected,
                         onPhotoClick = {
                             //Update the selected photo Id.
-                            selectedPhotoId = it.id
+                            selectedPhotoId = if (selectedPhotoId != it.id) {
+                                it.id
+                            } else {
+                                null
+                            }
                         }
                     )
 
@@ -132,7 +136,7 @@ fun DashboardScreen(
                 // ==========================
                 // Footer Progress Bar.
                 // ==========================
-                //Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
+                // Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
                 if (uiState.loading && uiState.photos.isNotEmpty()) {
                     item(span = { GridItemSpan(2) }) {
                         Row(
