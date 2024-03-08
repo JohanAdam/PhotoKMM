@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.nyan.photokmm.android.Purple
 import com.nyan.photokmm.android.R
+import com.nyan.photokmm.android.common.textfield.SearchTextField
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicator
 import eu.bambooapps.material3.pullrefresh.pullRefresh
 import eu.bambooapps.material3.pullrefresh.rememberPullRefreshState
@@ -41,7 +43,6 @@ import org.koin.androidx.compose.koinViewModel
 fun DashboardScreen(
     modifier: Modifier = Modifier
 ) {
-
     val dashboardViewModel: DashboardViewModel = koinViewModel()
     val uiState = dashboardViewModel.uiState
 
@@ -66,95 +67,106 @@ fun DashboardScreen(
         dashboardViewModel.message = null
     }
 
-
-
     // ==========================
     // Main content.
     // ==========================
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-            .pullRefresh(state = pullRefreshState)
-    ) {
+    Column {
         // ==========================
-        // Pull to Refresh Indicator.
+        // Search Field.
         // ==========================
-        PullRefreshIndicator(
-            refreshing = uiState.refreshing,
-            state = pullRefreshState,
-            modifier = modifier.align(Alignment.TopCenter)
+        SearchTextField(
+            value = dashboardViewModel.searchQuery,
+            onValueChange = dashboardViewModel::onSearchTextChanged,
+            onImeAction = { },
+            isRefreshing = uiState.refreshing,
+            modifier = modifier,
         )
 
-        // ==========================
-        // List.
-        // ==========================
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
+                .pullRefresh(state = pullRefreshState)
         ) {
             // ==========================
-            // Photo List Item.
+            // Pull to Refresh Indicator.
             // ==========================
-            itemsIndexed(uiState.photos,
-                key = { _, photo -> photo.id }) { index, photo ->
-                val isSelected = photo.id == selectedPhotoId
-
-                PhotoListItem(
-                    modifier = modifier,
-                    photo = photo,
-                    isSelected = isSelected,
-                    onPhotoClick = {
-                        //Update the selected photo Id.
-                        selectedPhotoId = it.id
-                    }
-                )
-
-                //Load more photos if scrolled to the end.
-                if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
-                    LaunchedEffect(key1 = Unit, block = { dashboardViewModel.loadPhotos(false) })
-                }
-            }
+            PullRefreshIndicator(
+                refreshing = uiState.refreshing,
+                state = pullRefreshState,
+                modifier = modifier.align(Alignment.TopCenter)
+            )
 
             // ==========================
-            // Footer Progress Bar.
+            // List.
             // ==========================
-            //Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
-            if (uiState.loading && uiState.photos.isNotEmpty()) {
-                item(span = { GridItemSpan(2) }) {
-                    Row(
-                        modifier = modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CircularProgressIndicator(color = Purple)
-                    }
-                }
-            }
-        }
-
-        // ==========================
-        // Floating Action button.
-        // ==========================
-        // Show floating action button if a photo is selected
-        if (selectedPhotoId != null) {
-            FloatingActionButton(
-                onClick = {
-                    dashboardViewModel.downloadSelectedImage(selectedPhotoId!!)
-                },
-                shape = CircleShape,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.BottomEnd)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_download),
-                    contentDescription = "Download"
-                )
+                // ==========================
+                // Photo List Item.
+                // ==========================
+                itemsIndexed(uiState.photos,
+                    key = { _, photo -> photo.id }) { index, photo ->
+                    val isSelected = photo.id == selectedPhotoId
+
+                    PhotoListItem(
+                        modifier = modifier,
+                        photo = photo,
+                        isSelected = isSelected,
+                        onPhotoClick = {
+                            //Update the selected photo Id.
+                            selectedPhotoId = it.id
+                        }
+                    )
+
+                    //Load more photos if scrolled to the end.
+                    if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
+                        LaunchedEffect(key1 = Unit, block = { dashboardViewModel.loadPhotos(false) })
+                    }
+                }
+
+                // ==========================
+                // Footer Progress Bar.
+                // ==========================
+                //Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
+                if (uiState.loading && uiState.photos.isNotEmpty()) {
+                    item(span = { GridItemSpan(2) }) {
+                        Row(
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(color = Purple)
+                        }
+                    }
+                }
+            }
+
+            // ==========================
+            // Floating Action button.
+            // ==========================
+            // Show floating action button if a photo is selected
+            if (selectedPhotoId != null) {
+                FloatingActionButton(
+                    onClick = {
+                        dashboardViewModel.downloadSelectedImage(selectedPhotoId!!)
+                    },
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.BottomEnd)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_download),
+                        contentDescription = "Download"
+                    )
+                }
             }
         }
     }
