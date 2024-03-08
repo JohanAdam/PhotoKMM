@@ -1,5 +1,6 @@
 package com.nyan.photokmm.android.dashboard
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.nyan.photokmm.android.Purple
@@ -50,6 +52,21 @@ fun DashboardScreen(
         refreshing = uiState.refreshing,
         onRefresh = { dashboardViewModel.loadPhotos(forceReload = true) }
     )
+
+    // Observe the messageEvent and show a toast
+    val messageEvent = dashboardViewModel.message
+    if (messageEvent != null) {
+        Toast.makeText(
+            LocalContext.current,
+            messageEvent,
+            Toast.LENGTH_SHORT
+        ).show()
+
+        // Reset the event after showing the toast
+        dashboardViewModel.message = null
+    }
+
+
 
     // ==========================
     // Main content.
@@ -127,7 +144,7 @@ fun DashboardScreen(
         if (selectedPhotoId != null) {
             FloatingActionButton(
                 onClick = {
-                    // Do something when floating action button is clicked
+                    dashboardViewModel.downloadSelectedImage(selectedPhotoId!!)
                 },
                 shape = CircleShape,
                 modifier = Modifier

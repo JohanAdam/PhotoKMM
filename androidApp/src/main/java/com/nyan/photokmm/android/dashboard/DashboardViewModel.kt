@@ -17,6 +17,8 @@ class DashboardViewModel(
     var uiState by mutableStateOf(DashboardScreenState())
     private var currentPage = 1
 
+    var message by mutableStateOf<String?>(null)
+
     init {
         //Load photos for the first time when the viewmodel is initialized.
         loadPhotos(forceReload = false)
@@ -65,6 +67,10 @@ class DashboardViewModel(
                 )
             }
         }
+    }
+
+    fun downloadSelectedImage(photoId: String) {
+        message = "Downloaded photo $photoId"
     }
 
 }
