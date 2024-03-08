@@ -19,6 +19,10 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -28,20 +32,23 @@ import com.nyan.photokmm.android.R
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicator
 import eu.bambooapps.material3.pullrefresh.pullRefresh
 import eu.bambooapps.material3.pullrefresh.rememberPullRefreshState
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    modifier: Modifier = Modifier,
-    uiState: DashboardScreenState,
-    loadNextPhotos: (Boolean) -> Unit,
-    selectedPhotoId: String?,
-    onPhotoSelected: (String?) -> Unit
+    modifier: Modifier = Modifier
 ) {
+
+    val dashboardViewModel: DashboardViewModel = koinViewModel()
+    val uiState = dashboardViewModel.uiState
+
+    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+
     //Pull to refresh state.
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.refreshing,
-        onRefresh = { loadNextPhotos(true) }
+        onRefresh = { dashboardViewModel.loadPhotos(forceReload = true) }
     )
 
     // ==========================
@@ -84,13 +91,13 @@ fun DashboardScreen(
                     isSelected = isSelected,
                     onPhotoClick = {
                         //Update the selected photo Id.
-                        onPhotoSelected(it.id)
+                        selectedPhotoId = it.id
                     }
                 )
 
                 //Load more photos if scrolled to the end.
                 if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
-                    LaunchedEffect(key1 = Unit, block = { loadNextPhotos(false) })
+                    LaunchedEffect(key1 = Unit, block = { dashboardViewModel.loadPhotos(false) })
                 }
             }
 

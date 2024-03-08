@@ -60,19 +60,7 @@ fun ComposeApp() {
             startDestination = Dashboard.routeWithArgs
         ) {
             composable(Dashboard.routeWithArgs) {
-
-                val dashboardViewModel: DashboardViewModel = koinViewModel()
-                val uiState = dashboardViewModel.uiState
-
-                var selectedPhotoId by remember { mutableStateOf<String?>(null) }
-
-                DashboardScreen(
-                    uiState = uiState,
-                    loadNextPhotos = {
-                        dashboardViewModel.loadPhotos(forceReload = it)
-                    },
-                    selectedPhotoId = selectedPhotoId,
-                    onPhotoSelected = { selectedPhotoId = it })
+                DashboardScreen()
             }
         }
     }
