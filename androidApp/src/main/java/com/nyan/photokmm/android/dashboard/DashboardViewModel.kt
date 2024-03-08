@@ -79,19 +79,19 @@ class DashboardViewModel(
         message = "Downloaded photo $photoId"
     }
 
-    fun onSearchTextChanged(searchText: String, onSubmit: Boolean = false) {
+    fun onSearchTextChanged(searchText: String) {
         searchQuery = searchText
 
-        //If onSubmit false, need to delay before sent the queryText to loadPhoto.
-        if (!onSubmit) {
-            debounceJob?.cancel() // Cancel the previous debounce job
+        //If searchText is not empty, we delay some input before submit to api.
+        if (searchText.isNotEmpty()) {
+            debounceJob?.cancel() // Cancel the previous debounce job.
             debounceJob = viewModelScope.launch {
                 // Delay time 1 second before sent the query to API.
                 delay(1000)
                 loadPhotos(true, searchQuery)
             }
         } else {
-            //Load photos with query text without delay.
+            //If searchText is empty, we immediately call the api.
             loadPhotos(true, searchQuery)
         }
     }

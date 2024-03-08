@@ -78,7 +78,8 @@ fun DashboardScreen(
             value = dashboardViewModel.searchQuery,
             onValueChange = dashboardViewModel::onSearchTextChanged,
             onImeAction = { },
-            modifier = modifier
+            isRefreshing = uiState.refreshing,
+            modifier = modifier,
         )
 
         Box(
