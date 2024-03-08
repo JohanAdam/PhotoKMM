@@ -1,5 +1,6 @@
 package com.nyan.photokmm.android.dashboard
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,16 +12,19 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.nyan.photokmm.android.Purple
-import com.nyan.photokmm.domain.model.Photo
+import com.nyan.photokmm.android.R
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicator
 import eu.bambooapps.material3.pullrefresh.pullRefresh
 import eu.bambooapps.material3.pullrefresh.rememberPullRefreshState
@@ -31,7 +35,8 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     uiState: DashboardScreenState,
     loadNextPhotos: (Boolean) -> Unit,
-    navigateToDetail: (Photo) -> Unit
+    selectedPhotoId: String?,
+    onPhotoSelected: (String?) -> Unit
 ) {
     //Pull to refresh state.
     val pullRefreshState = rememberPullRefreshState(
@@ -71,9 +76,17 @@ fun DashboardScreen(
             // ==========================
             itemsIndexed(uiState.photos,
                 key = { _, photo -> photo.id }) { index, photo ->
-                PhotoListItem(modifier = modifier,
+                val isSelected = photo.id == selectedPhotoId
+
+                PhotoListItem(
+                    modifier = modifier,
                     photo = photo,
-                    onPhotoClick = { navigateToDetail(photo) })
+                    isSelected = isSelected,
+                    onPhotoClick = {
+                        //Update the selected photo Id.
+                        onPhotoSelected(it.id)
+                    }
+                )
 
                 //Load more photos if scrolled to the end.
                 if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
@@ -97,6 +110,27 @@ fun DashboardScreen(
                         CircularProgressIndicator(color = Purple)
                     }
                 }
+            }
+        }
+
+        // ==========================
+        // Floating Action button.
+        // ==========================
+        // Show floating action button if a photo is selected
+        if (selectedPhotoId != null) {
+            FloatingActionButton(
+                onClick = {
+                    // Do something when floating action button is clicked
+                },
+                shape = CircleShape,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_download),
+                    contentDescription = "Download"
+                )
             }
         }
     }

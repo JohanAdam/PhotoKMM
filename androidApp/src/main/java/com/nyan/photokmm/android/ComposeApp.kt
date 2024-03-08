@@ -7,6 +7,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
@@ -57,15 +60,19 @@ fun ComposeApp() {
             startDestination = Dashboard.routeWithArgs
         ) {
             composable(Dashboard.routeWithArgs) {
+
                 val dashboardViewModel: DashboardViewModel = koinViewModel()
+                val uiState = dashboardViewModel.uiState
+
+                var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+
                 DashboardScreen(
-                    uiState = dashboardViewModel.uiState,
+                    uiState = uiState,
                     loadNextPhotos = {
                         dashboardViewModel.loadPhotos(forceReload = it)
                     },
-                    navigateToDetail = {
-
-                    })
+                    selectedPhotoId = selectedPhotoId,
+                    onPhotoSelected = { selectedPhotoId = it })
             }
         }
     }

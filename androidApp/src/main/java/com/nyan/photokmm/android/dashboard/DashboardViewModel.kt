@@ -74,5 +74,5 @@ data class DashboardScreenState (
     var refreshing: Boolean = false,
     var photos: List<Photo> = listOf(),
     var errorMsg: String? = null,
-    var loadFinished: Boolean = false
+    var loadFinished: Boolean = false,
 )
