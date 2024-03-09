@@ -14,4 +14,8 @@ internal class PhotoRepositoryImpl(
             photoDTO.toPhoto(index)
         }
     }
+
+    override suspend fun downloadImage(imageUrl: String): ByteArray? {
+        return remoteDataSource.downloadImages(imageUrl)
+    }
 }

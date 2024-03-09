@@ -6,11 +6,15 @@ import kotlinx.coroutines.withContext
 
 internal class RemoteDataSource(
     private val apiService: PhotoService,
-    private val dispatcher: Dispatcher
+    private val dispatcher: Dispatcher,
 ) {
 
     suspend fun getPhotos(tags: String, page: Int) = withContext(dispatcher.io) {
         apiService.getPhotos(tags = tags, page = page)
+    }
+
+    suspend fun downloadImages(imageUrl: String) = withContext(dispatcher.io) {
+        apiService.downloadImage(imageUrl)
     }
 
 }

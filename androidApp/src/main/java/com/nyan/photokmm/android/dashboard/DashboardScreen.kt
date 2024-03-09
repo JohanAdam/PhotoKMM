@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.nyan.photokmm.android.Purple
 import com.nyan.photokmm.android.R
 import com.nyan.photokmm.android.common.textfield.SearchTextField
+import com.nyan.photokmm.domain.model.Photo
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicator
 import eu.bambooapps.material3.pullrefresh.pullRefresh
 import eu.bambooapps.material3.pullrefresh.rememberPullRefreshState
@@ -46,7 +47,7 @@ fun DashboardScreen(
     val dashboardViewModel: DashboardViewModel = koinViewModel()
     val uiState = dashboardViewModel.uiState
 
-    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+    var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
 
     //Pull to refresh state.
     val pullRefreshState = rememberPullRefreshState(
@@ -111,7 +112,7 @@ fun DashboardScreen(
                 // ==========================
                 itemsIndexed(uiState.photos,
                     key = { _, photo -> photo.id }) { index, photo ->
-                    val isSelected = photo.id == selectedPhotoId
+                    val isSelected = photo.id == selectedPhoto?.id
 
                     PhotoListItem(
                         modifier = modifier,
@@ -119,8 +120,8 @@ fun DashboardScreen(
                         isSelected = isSelected,
                         onPhotoClick = {
                             //Update the selected photo Id.
-                            selectedPhotoId = if (selectedPhotoId != it.id) {
-                                it.id
+                            selectedPhoto = if (selectedPhoto?.id != it.id) {
+                                it
                             } else {
                                 null
                             }
@@ -156,10 +157,10 @@ fun DashboardScreen(
             // Floating Action button.
             // ==========================
             // Show floating action button if a photo is selected
-            if (selectedPhotoId != null) {
+            if (selectedPhoto != null) {
                 FloatingActionButton(
                     onClick = {
-                        dashboardViewModel.downloadSelectedImage(selectedPhotoId!!)
+                        dashboardViewModel.downloadSelectedImage(selectedPhoto!!)
                     },
                     shape = CircleShape,
                     modifier = Modifier
