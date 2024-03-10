@@ -22,9 +22,6 @@ class DashboardViewModel(
     var searchQuery by mutableStateOf("")
         private set
 
-    //Marker for reset the scroll state, if the list is new.
-    var isNewList = mutableStateOf(false)
-
     var message by mutableStateOf<String?>(null)
 
     init {
@@ -91,9 +88,6 @@ class DashboardViewModel(
             //If searchText is empty, we immediately call the api.
             loadPhotos(true)
         }
-
-        //Mark this as new list, so it can reset the list position.
-        isNewList.value = true
     }
 }
 
