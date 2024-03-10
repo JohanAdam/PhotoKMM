@@ -8,7 +8,7 @@ import io.ktor.client.request.parameter
 
 internal class PhotoService: ApiClient() {
 
-    suspend fun getPhotos(tags: String, page: Int): PhotosResponse = client.get {
+    suspend fun getPhotos(tags: String): PhotosResponse = client.get {
         pathUrl("services/rest")
         parameter("method", METHOD)
         parameter("tags", tags)
@@ -16,7 +16,7 @@ internal class PhotoService: ApiClient() {
         parameter("nojsoncallback", NO_JSON_CALLBACK)
         parameter("extras", "$EXTRAS_MEDIA,$EXTRAS_URL_SQ,$EXTRAS_URL_M")
         parameter("per_page", MAX_ITEM_PER_PAGE)
-        parameter("page", page)
+        parameter("page", 1)
     }.body()
 
     companion object {

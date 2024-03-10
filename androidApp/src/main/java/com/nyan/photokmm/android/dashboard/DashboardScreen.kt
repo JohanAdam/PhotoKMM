@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.nyan.photokmm.android.Purple
 import com.nyan.photokmm.android.R
 import com.nyan.photokmm.android.common.textfield.SearchTextField
+import com.nyan.photokmm.domain.model.Photo
 import eu.bambooapps.material3.pullrefresh.PullRefreshIndicator
 import eu.bambooapps.material3.pullrefresh.pullRefresh
 import eu.bambooapps.material3.pullrefresh.rememberPullRefreshState
@@ -47,7 +48,7 @@ fun DashboardScreen(
     val dashboardViewModel: DashboardViewModel = koinViewModel()
     val uiState = dashboardViewModel.uiState
 
-    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+    var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
 
     val listState = rememberLazyGridState()
 
@@ -73,7 +74,7 @@ fun DashboardScreen(
         listState.scrollToItem(0)
 
         //Reset selected item.
-        selectedPhotoId = null
+        selectedPhoto = null
 
         //Reset the event after the list state is reset.
         dashboardViewModel.isNewList.value = false
@@ -123,8 +124,8 @@ fun DashboardScreen(
                 // Photo List Item.
                 // ==========================
                 itemsIndexed(uiState.photos,
-                    key = { _, photo -> photo.id }) { index, photo ->
-                    val isSelected = photo.id == selectedPhotoId
+                    key = { _, photo -> photo.id }) { _, photo ->
+                    val isSelected = photo.id == selectedPhoto?.id
 
                     PhotoListItem(
                         modifier = modifier,
@@ -132,36 +133,13 @@ fun DashboardScreen(
                         isSelected = isSelected,
                         onPhotoClick = {
                             //Update the selected photo Id.
-                            selectedPhotoId = if (selectedPhotoId != it.id) {
-                                it.id
+                            selectedPhoto = if (selectedPhoto?.id != it.id) {
+                                it
                             } else {
                                 null
                             }
                         }
                     )
-
-                    //Load more photos if scrolled to the end.
-                    if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
-                        LaunchedEffect(key1 = Unit, block = { dashboardViewModel.loadPhotos(false) })
-                    }
-                }
-
-                // ==========================
-                // Footer Progress Bar.
-                // ==========================
-                // Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
-                if (uiState.loading && uiState.photos.isNotEmpty()) {
-                    item(span = { GridItemSpan(2) }) {
-                        Row(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CircularProgressIndicator(color = Purple)
-                        }
-                    }
                 }
             }
 
@@ -169,10 +147,10 @@ fun DashboardScreen(
             // Floating Action button.
             // ==========================
             // Show floating action button if a photo is selected
-            if (selectedPhotoId != null) {
+            if (selectedPhoto != null) {
                 FloatingActionButton(
                     onClick = {
-                        dashboardViewModel.downloadSelectedImage(selectedPhotoId!!)
+                        dashboardViewModel.downloadSelectedImage(selectedPhoto)
                     },
                     shape = CircleShape,
                     modifier = Modifier
