@@ -30,7 +30,7 @@ class DashboardViewModel(
         loadPhotos(forceReload = false)
     }
 
-    fun loadPhotos(forceReload: Boolean = false, tag: String = "") {
+    fun loadPhotos(forceReload: Boolean = false) {
         // If already loading, return.
         if (uiState.loading) return
         // Reset current page if force reload is enabled.
@@ -45,7 +45,7 @@ class DashboardViewModel(
             try {
                 //Get the photos from source.
                 val result = getPhotosUseCase(
-                    tags = tag.ifEmpty { "Electrolux" },
+                    tags = searchQuery.ifEmpty { "Electrolux" },
                     page = currentPage)
                 //Combine the result with the previous list.
                 val photos = if (currentPage == 1) result else uiState.photos + result
@@ -88,11 +88,11 @@ class DashboardViewModel(
             debounceJob = viewModelScope.launch {
                 // Delay time 1 second before sent the query to API.
                 delay(1000)
-                loadPhotos(true, searchQuery)
+                loadPhotos(true)
             }
         } else {
             //If searchText is empty, we immediately call the api.
-            loadPhotos(true, searchQuery)
+            loadPhotos(true)
         }
     }
 }
