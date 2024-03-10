@@ -25,6 +25,9 @@ class DashboardViewModel(
     var searchQuery by mutableStateOf("")
         private set
 
+    //Marker for reset the scroll state, if the list is new.
+    var isNewList = mutableStateOf(false)
+
     init {
         //Load photos for the first time when the viewmodel is initialized.
         loadPhotos(forceReload = false)
@@ -40,7 +43,10 @@ class DashboardViewModel(
 
         viewModelScope.launch {
             // Set loading state
-            uiState = uiState.copy(loading = true)
+            uiState = uiState.copy(
+                loading = true,
+                photos = emptyList()
+            )
 
             try {
                 //Get the photos from source.
@@ -64,12 +70,13 @@ class DashboardViewModel(
                 // Handle error if anything happen during fetch photos.
                 error.printStackTrace()
 
+                message = "Unable to load photos due to ${error.localizedMessage}"
+
                 //Update UI with error message.
                 uiState = uiState.copy(
                     loading = false,
                     refreshing = false,
                     loadFinished = true,
-                    errorMsg = "Unable to load photos due to ${error.localizedMessage}"
                 )
             }
         }
@@ -94,6 +101,9 @@ class DashboardViewModel(
             //If searchText is empty, we immediately call the api.
             loadPhotos(true)
         }
+
+        //Mark this as new list, so it can reset the list position.
+        isNewList.value = true
     }
 }
 
@@ -101,6 +111,5 @@ data class DashboardScreenState (
     var loading: Boolean = false,
     var refreshing: Boolean = false,
     var photos: List<Photo> = listOf(),
-    var errorMsg: String? = null,
     var loadFinished: Boolean = false,
 )

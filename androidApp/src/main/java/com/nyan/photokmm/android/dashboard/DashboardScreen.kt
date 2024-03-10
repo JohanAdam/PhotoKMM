@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,23 +49,34 @@ fun DashboardScreen(
 
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
+    val listState = rememberLazyGridState()
+
     //Pull to refresh state.
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.refreshing,
         onRefresh = { dashboardViewModel.loadPhotos(forceReload = true) }
     )
 
-    // Observe the messageEvent and show a toast
-    val messageEvent = dashboardViewModel.message
-    if (messageEvent != null) {
-        Toast.makeText(
-            LocalContext.current,
-            messageEvent,
-            Toast.LENGTH_SHORT
-        ).show()
+    // Observe the messageEvent and show a toast.
+    val message = dashboardViewModel.message
+    if (message != null) {
+        ShowToast(message)
 
-        // Reset the event after showing the toast
+        // Reset the event after showing the toast.
         dashboardViewModel.message = null
+    }
+
+    //Reset the list state if the list is new.
+    val isNewList by dashboardViewModel.isNewList
+    LaunchedEffect(isNewList) {
+        //Reset the list to position 0.
+        listState.scrollToItem(0)
+
+        //Reset selected item.
+        selectedPhotoId = null
+
+        //Reset the event after the list state is reset.
+        dashboardViewModel.isNewList.value = false
     }
 
     // ==========================
@@ -101,6 +113,7 @@ fun DashboardScreen(
             // List.
             // ==========================
             LazyVerticalGrid(
+                state = listState,
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -174,4 +187,13 @@ fun DashboardScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ShowToast(errorMsg: String?) {
+    Toast.makeText(
+        LocalContext.current,
+        errorMsg,
+        Toast.LENGTH_SHORT
+    ).show()
 }

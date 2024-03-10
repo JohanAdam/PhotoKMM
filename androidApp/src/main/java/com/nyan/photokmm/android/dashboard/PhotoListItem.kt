@@ -35,7 +35,7 @@ fun PhotoListItem(
         Card(modifier = modifier
             .fillMaxSize()
             .clip(shape = RoundedCornerShape(parentItemRadius))
-            .clickable { onPhotoClick.invoke(photo) }) {
+            .clickable { onPhotoClick(photo) }) {
 
             Column {
                 // ==========================
