@@ -9,7 +9,7 @@ class GetPhotosUseCase: KoinComponent {
     private val repository: PhotoRepository by inject()
 
     @Throws(Exception::class)
-    suspend operator fun invoke(tags: String, page: Int): List<Photo> {
-        return repository.getPhotos(tags, page)
+    suspend operator fun invoke(tags: String): List<Photo> {
+        return repository.getPhotos(tags)
     }
 }
