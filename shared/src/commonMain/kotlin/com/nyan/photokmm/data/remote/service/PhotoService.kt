@@ -5,6 +5,8 @@ import com.nyan.photokmm.data.remote.model.PhotosResponse
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.readBytes
 
 internal class PhotoService: ApiClient() {
 
@@ -18,6 +20,22 @@ internal class PhotoService: ApiClient() {
         parameter("per_page", MAX_ITEM_PER_PAGE)
         parameter("page", 1)
     }.body()
+
+    suspend fun downloadImage(imageUrl: String): ByteArray? {
+        return try {
+            val response: HttpResponse = client.get(imageUrl)
+            //If success response code, return the bytes array.
+            return if (response.status.value in 200..299) {
+                response.readBytes()
+            } else {
+                // Handle non-2xx response codes (e.g., log error).
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
     companion object {
         private const val METHOD = "flickr.photos.search"

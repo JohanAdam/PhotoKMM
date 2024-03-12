@@ -6,13 +6,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nyan.photokmm.domain.model.Photo
+import com.nyan.photokmm.domain.usecase.DownloadImageUseCase
 import com.nyan.photokmm.domain.usecase.GetPhotosUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DashboardViewModel(
-    val getPhotosUseCase: GetPhotosUseCase
+    val getPhotosUseCase: GetPhotosUseCase,
+    val downloadImageUseCase: DownloadImageUseCase
 ): ViewModel() {
     // Define the mutable state for the UI.
     var uiState by mutableStateOf(DashboardScreenState())
@@ -26,7 +28,7 @@ class DashboardViewModel(
 
     init {
         //Load photos for the first time when the viewmodel is initialized.
-        loadPhotos(forceReload = false)
+        loadPhotos(forceReload = true)
     }
 
     fun loadPhotos(forceReload: Boolean = false) {
@@ -70,7 +72,12 @@ class DashboardViewModel(
     }
 
     fun downloadSelectedImage(photo: Photo?) {
-        message = "Downloaded photo ${photo?.title}"
+        photo?.let {
+            viewModelScope.launch {
+                val result = downloadImageUseCase(photo.title, photo.url)
+                message = "$result"
+            }
+        }
     }
 
     fun onSearchTextChanged(searchText: String) {
