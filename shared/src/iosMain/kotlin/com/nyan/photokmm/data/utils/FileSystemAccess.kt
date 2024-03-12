@@ -5,9 +5,7 @@ internal class LocalStorageManagerIos: FileSystemAccess {
         throw NotImplementedError()
     }
 
-    override suspend fun getFile(fileName: String): ByteArray? {
-        throw NotImplementedError()
-    }
 }
 
 actual fun provideFileSystemAccess(): FileSystemAccess = LocalStorageManagerIos()
+

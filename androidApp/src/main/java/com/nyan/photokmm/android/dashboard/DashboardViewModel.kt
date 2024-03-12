@@ -28,7 +28,7 @@ class DashboardViewModel(
 
     init {
         //Load photos for the first time when the viewmodel is initialized.
-        loadPhotos(forceReload = false)
+        loadPhotos(forceReload = true)
     }
 
     fun loadPhotos(forceReload: Boolean = false) {
@@ -72,13 +72,12 @@ class DashboardViewModel(
     }
 
     fun downloadSelectedImage(photo: Photo?) {
-        message = "Downloaded photo ${photo?.id} ; ${photo?.title}"
-
-        //TODO Implement download image logic.
-//        viewModelScope.launch {
-//            val result = downloadImageUseCase(photo.url)
-//            message = "result is $result"
-//        }
+        photo?.let {
+            viewModelScope.launch {
+                val result = downloadImageUseCase(photo.title, photo.url)
+                message = "$result"
+            }
+        }
     }
 
     fun onSearchTextChanged(searchText: String) {

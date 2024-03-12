@@ -3,20 +3,21 @@ package com.nyan.photokmm.domain.usecase
 import com.nyan.photokmm.data.utils.FileSystemAccess
 import com.nyan.photokmm.domain.repository.PhotoRepository
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
-class DownloadImageUseCase: KoinComponent {
-    private val repository: PhotoRepository by inject()
-    private val fileSystemAccess: FileSystemAccess by inject()
-
+class DownloadImageUseCase(
+    private val fileSystemAccess: FileSystemAccess,
+    private val repository: PhotoRepository,
+): KoinComponent {
     @Throws(Exception::class)
-    suspend operator fun invoke(imageUrl: String): String? {
+    suspend operator fun invoke(photoTitle: String, imageUrl: String): String? {
+        //Download image into byte.
         val imageBytes = repository.downloadImage(imageUrl) ?: return null
 
-        val fileName = "image_test.jpg"
-        if (fileSystemAccess.saveFile(fileName, imageBytes)) {
-            return fileName
+        //Save the byte as image file in storage.
+        return if (fileSystemAccess.saveFile(photoTitle, imageBytes)) {
+            "Downloaded photo $photoTitle"
+        } else {
+            "Error while download image."
         }
-        return null
     }
 }

@@ -23,7 +23,7 @@ private val dataModule = module {
 private val domainModule = module {
     single<PhotoRepository> { PhotoRepositoryImpl(get()) }
     factory { GetPhotosUseCase() }
-    factory { DownloadImageUseCase() }
+    factory { DownloadImageUseCase(get(), get()) }
 }
 
 private val sharedModules = listOf(utilityModule, dataModule, domainModule)

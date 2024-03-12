@@ -26,8 +26,7 @@ internal class PhotoService: ApiClient() {
             val response: HttpResponse = client.get(imageUrl)
             //If success response code, return the bytes array.
             return if (response.status.value in 200..299) {
-                val bytes = response.readBytes()
-                bytes
+                response.readBytes()
             } else {
                 // Handle non-2xx response codes (e.g., log error).
                 null
