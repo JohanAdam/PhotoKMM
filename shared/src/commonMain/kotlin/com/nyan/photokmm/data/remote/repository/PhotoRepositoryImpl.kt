@@ -8,8 +8,8 @@ import com.nyan.photokmm.domain.repository.PhotoRepository
 internal class PhotoRepositoryImpl(
     private val remoteDataSource: RemoteDataSource
 ): PhotoRepository {
-    override suspend fun getPhotos(tags: String, page: Int): List<Photo> {
-        return remoteDataSource.getPhotos(tags, page).photos.photo.mapIndexed { index, photoDTO ->
+    override suspend fun getPhotos(tags: String): List<Photo> {
+        return remoteDataSource.getPhotos(tags).photos.photo.mapIndexed { index, photoDTO ->
             //We mapping the PhotoDTO to Photo before send the list to view.
             photoDTO.toPhoto(index)
         }

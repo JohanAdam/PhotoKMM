@@ -9,8 +9,8 @@ internal class RemoteDataSource(
     private val dispatcher: Dispatcher,
 ) {
 
-    suspend fun getPhotos(tags: String, page: Int) = withContext(dispatcher.io) {
-        apiService.getPhotos(tags = tags, page = page)
+    suspend fun getPhotos(tags: String) = withContext(dispatcher.io) {
+        apiService.getPhotos(tags = tags)
     }
 
     suspend fun downloadImages(imageUrl: String) = withContext(dispatcher.io) {

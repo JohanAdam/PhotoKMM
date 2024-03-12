@@ -7,15 +7,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.nyan.photokmm.android.Purple
 import com.nyan.photokmm.android.R
 import com.nyan.photokmm.android.common.textfield.SearchTextField
 import com.nyan.photokmm.domain.model.Photo
@@ -49,23 +46,27 @@ fun DashboardScreen(
 
     var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
 
+    val listState = rememberLazyGridState()
+
     //Pull to refresh state.
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.refreshing,
         onRefresh = { dashboardViewModel.loadPhotos(forceReload = true) }
     )
 
-    // Observe the messageEvent and show a toast
-    val messageEvent = dashboardViewModel.message
-    if (messageEvent != null) {
-        Toast.makeText(
-            LocalContext.current,
-            messageEvent,
-            Toast.LENGTH_SHORT
-        ).show()
+    // Observe the messageEvent and show a toast.
+    val message = dashboardViewModel.message
+    if (message != null) {
+        ShowToast(message)
 
-        // Reset the event after showing the toast
+        // Reset the event after showing the toast.
         dashboardViewModel.message = null
+    }
+
+    //Reset selectedPhoto when refresh new list.
+    val isNewList = uiState.refreshing
+    LaunchedEffect(isNewList) {
+        selectedPhoto = null
     }
 
     // ==========================
@@ -102,6 +103,7 @@ fun DashboardScreen(
             // List.
             // ==========================
             LazyVerticalGrid(
+                state = listState,
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -111,7 +113,7 @@ fun DashboardScreen(
                 // Photo List Item.
                 // ==========================
                 itemsIndexed(uiState.photos,
-                    key = { _, photo -> photo.id }) { index, photo ->
+                    key = { _, photo -> photo.id }) { _, photo ->
                     val isSelected = photo.id == selectedPhoto?.id
 
                     PhotoListItem(
@@ -127,29 +129,6 @@ fun DashboardScreen(
                             }
                         }
                     )
-
-                    //Load more photos if scrolled to the end.
-                    if (index >= uiState.photos.size - 1 && !uiState.loading && !uiState.loadFinished) {
-                        LaunchedEffect(key1 = Unit, block = { dashboardViewModel.loadPhotos(false) })
-                    }
-                }
-
-                // ==========================
-                // Footer Progress Bar.
-                // ==========================
-                // Show footer progress bar IF fetch more photo is in progress and the list is not empty currently.
-                if (uiState.loading && uiState.photos.isNotEmpty()) {
-                    item(span = { GridItemSpan(2) }) {
-                        Row(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CircularProgressIndicator(color = Purple)
-                        }
-                    }
                 }
             }
 
@@ -160,7 +139,7 @@ fun DashboardScreen(
             if (selectedPhoto != null) {
                 FloatingActionButton(
                     onClick = {
-                        dashboardViewModel.downloadSelectedImage(selectedPhoto!!)
+                        dashboardViewModel.downloadSelectedImage(selectedPhoto)
                     },
                     shape = CircleShape,
                     modifier = Modifier
@@ -175,4 +154,13 @@ fun DashboardScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ShowToast(errorMsg: String?) {
+    Toast.makeText(
+        LocalContext.current,
+        errorMsg,
+        Toast.LENGTH_SHORT
+    ).show()
 }

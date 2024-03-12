@@ -18,67 +18,61 @@ class DashboardViewModel(
 ): ViewModel() {
     // Define the mutable state for the UI.
     var uiState by mutableStateOf(DashboardScreenState())
-    private var currentPage = 1
-
-    var message by mutableStateOf<String?>(null)
 
     //Search job delay.
     private var debounceJob: Job? = null
     var searchQuery by mutableStateOf("")
         private set
 
+    var message by mutableStateOf<String?>(null)
+
     init {
         //Load photos for the first time when the viewmodel is initialized.
         loadPhotos(forceReload = false)
     }
 
-    fun loadPhotos(forceReload: Boolean = false, tag: String = "") {
+    fun loadPhotos(forceReload: Boolean = false) {
         // If already loading, return.
         if (uiState.loading) return
-        // Reset current page if force reload is enabled.
-        if (forceReload) currentPage = 1
-        // Set refreshing state if loading first page.
-        if (currentPage == 1) uiState = uiState.copy(refreshing = true)
+        // Set refreshing state true if loading first page OR we manually refresh.
+        if (forceReload) uiState = uiState.copy(refreshing = true)
 
         viewModelScope.launch {
             // Set loading state
-            uiState = uiState.copy(loading = true)
+            uiState = uiState.copy(
+                loading = true,
+                photos = emptyList()
+            )
 
             try {
                 //Get the photos from source.
                 val result = getPhotosUseCase(
-                    tags = tag.ifEmpty { "Electrolux" },
-                    page = currentPage)
-                //Combine the result with the previous list.
-                val photos = if (currentPage == 1) result else uiState.photos + result
+                    tags = searchQuery.ifEmpty { "Electrolux" })
 
-                //Increment pages after success.
-                currentPage += 1
                 //Apply the result to ui state.
                 uiState = uiState.copy(
                     loading = false,
                     refreshing = false,
-                    loadFinished = result.isEmpty(),
-                    photos = photos
+                    photos = result
                 )
 
             } catch (error: Throwable) {
                 // Handle error if anything happen during fetch photos.
                 error.printStackTrace()
 
+                message = "Unable to load photos due to ${error.localizedMessage}"
+
                 //Update UI with error message.
                 uiState = uiState.copy(
                     loading = false,
                     refreshing = false,
-                    loadFinished = true,
-                    errorMsg = "Unable to load photos due to ${error.localizedMessage}"
                 )
             }
         }
     }
 
-    fun downloadSelectedImage(photo: Photo) {
-        message = "Downloaded photo ${photo.id} ; ${photo.title}"
+    fun downloadSelectedImage(photo: Photo?) {
+        message = "Downloaded photo ${photo?.id} ; ${photo?.title}"
 
         //TODO Implement download image logic.
 //        viewModelScope.launch {
@@ -96,11 +90,11 @@ class DashboardViewModel(
             debounceJob = viewModelScope.launch {
                 // Delay time 1 second before sent the query to API.
                 delay(1000)
-                loadPhotos(true, searchQuery)
+                loadPhotos(true)
             }
         } else {
             //If searchText is empty, we immediately call the api.
-            loadPhotos(true, searchQuery)
+            loadPhotos(true)
         }
     }
 }
@@ -109,6 +103,4 @@ data class DashboardScreenState (
     var loading: Boolean = false,
     var refreshing: Boolean = false,
     var photos: List<Photo> = listOf(),
-    var errorMsg: String? = null,
-    var loadFinished: Boolean = false,
 )
